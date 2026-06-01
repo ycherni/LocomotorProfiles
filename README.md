@@ -1,4 +1,4 @@
-# Biomechanics Gait Analysis — Analyses données STP du projet SurfaceIRR
+# LocomotorProfiles — Analyses données STP du projet SurfaceIRR
 
 > **Projet MSc. Silvère De Freitas** — Analyse de la marche sur surfaces irrégulières chez différents groupes d'âge (Jeunes Enfants, Enfants, Adolescents, Adultes). 2025-2026
 ---
