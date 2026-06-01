@@ -1,4 +1,4 @@
-setwd("C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Fig/Clustering")
+setwd("XX") #Vers dossier avec données de la matrice issue du clustering
 
 # ---------------------------
 # I - Stats entre les clusters (chi², t-test, visualisation Age - Sexe - Surface)
@@ -16,7 +16,7 @@ library(fmsb)
 
 
 # 2. Importation
-df_clust <- read.csv("DATA_FOR_R_GLOBAL_20260123_1409.csv", sep = ";", check.names = FALSE)
+df_clust <- read.csv("DATA_FOR_R_GLOBAL_XX.csv", sep = ";", check.names = FALSE) #Prendre le fichier d'intérêt
 df_meta <- read.csv(file.choose(), sep = ";", check.names = FALSE)
 # Aller chercher le fichier "participant.metadonnees" dans le dossier stats LMM - stats descriptives
 
@@ -39,7 +39,7 @@ df <- left_join(df_clust, df_meta_clean, by = "Participant")
 
 # 1. Charger le fichier ACP_Clustering_DATA
 df_acp <- read.csv(
-  "C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Statistical_Analysis_LMM/Prepared_Data/ACP_Clustering_DATA.csv",
+  "XX", #Vers la grande matrice de données spatio-temporelles
   sep = ";",
   check.names = FALSE
 )
@@ -1196,7 +1196,7 @@ message("Fichiers créés : Radar_Plot_Clusters.pdf et Radar_Plot_Clusters.png")
 # Comparaison entre enfants stables Cluster 1 et migrants vers Cluster 2
 # Entre surfaces Even et High
 
-setwd("C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Fig/Clustering")
+setwd("XX") #Vers dossier avec données clustering
 
 # =========================================================
 # 0) LIBRAIRIES

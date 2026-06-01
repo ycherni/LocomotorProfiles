@@ -1,14 +1,13 @@
-%% CLUSTERING SPATIO-TEMPOREL — PUBLICATION-GRADE (k-means robuste, nPC >= 70% var.)
+%% CLUSTERING SPATIO-TEMPOREL (k-means, nPC >= 70% var.)
 % - ACP commune (z-score), clustering sur nPC_final (variance cumulée >= 70%)
 % - Viz PC1–PC2 (gradient d'âge), mais partition apprise sur nPC_final
-% - Sélection de k par vote multi-critères (Sil, CH, DBI, Gap-1SE) + Stabilité (bootstrap ARI)
+% - Sélection de k (WCSS, Sil, CH, DBI, Gap-1SE) + Stabilité (bootstrap ARI)
 % - Rapports "littéraires" : z & unités réelles, Cohen's d, tests (ANOVA/Kruskal) + FDR
-% - Analyses GLOBAL + PAR CONDITION (Plat/Medium/High), exports CSV/PNG
 
 clc; clear; close all;
 
 % === Dossier d'E/S ===
-root_path = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result';
+root_path = 'XX'; % vers dossier de résultats
 cd(root_path)
 load('SpatioTemporalDATA.mat') % attend SpatioTemporalDATA.ALL.(Plat|Medium|High)
 
@@ -531,7 +530,7 @@ fprintf('✅ Figure PC1-PC2 exportée : %s\n', out_pc12);
 % Annotations d'âge
 %AgeStats_global = annotate_age_on_clusters(gca, Xpcs_all_viz, idxCluster_global, Cc_global_pc12, meta.AgeMonths);
 
-%%
+%% Figure pour déterminer le nombre de cluster
 % --- Courbe du coude (WCSS) + Silhouette + ARI sur UNE SEULE FIGURE ---
 WCSS_vals = zeros(size(kRange));
 for kk = 1:numel(kRange)
@@ -597,9 +596,7 @@ ax.Box = 'on';
 
 exportgraphics(fig_elbow_combo, fullfile(outdir, "03a_Elbow_Sil_ARI_GLOBAL_"+ts+".png"), 'Resolution',300);
 
-%%
-
-
+%% SUITE CODE
 exportgraphics(fig_agegrad_shapes, ...
                fullfile(outdir, "04_PC1PC2_AgeGradient_Shapes_GLOBAL_k"+k_global+"_"+ts+".png"), ...
                'Resolution', 300);
@@ -704,140 +701,6 @@ disp(StatsClusters)
 writetable(StatsClusters, fullfile(outdir, "ClusterComparison_STATS_BONFERRONI_"+ts+".csv"));
 
 fprintf('\n💡 Aller voir le fichier R pour stats inter-cluster');
-
-%% ========== (B) CLUSTERING PAR K-MEANS ANALYSES PAR CONDITION (Plat / Medium / High) ==========
-independentPCA = false;  % false = ACP commune (comparabilité), true = ACP par condition
-
-for iC = 1:numel(conds)
-    cond = conds{iC};
-    idxCond = meta.Condition == cond;
-    nCond = sum(idxCond);
-    
-    if nCond < 10 % Seuil pour assurer la stabilité
-        warning('Condition %s: trop peu d''observations (%d). Clustering sauté.', cond, nCond);
-        continue;
-    end
-
-    % --- Préparation des données spécifiques à la surface ---
-    if independentPCA
-        Xnorm_c = dataNorm(idxCond, :);
-        [~, score_c, ~, ~, explained_c] = pca(Xnorm_c);
-        pcs_c_viz = score_c(:,1:2);              
-        pcs_c     = score_c(:,1:min(nPC_final,size(score_c,2))); 
-        expl1 = explained_c(1); expl2 = explained_c(2);
-    else
-        pcs_c_viz = Xpcs_all_viz(idxCond,:);     
-        pcs_c     = Xpcs_all(idxCond,:);         
-        expl1 = explained(1); expl2 = explained(2);
-        Xnorm_c = dataNorm(idxCond, :);
-    end
-    meta_c = meta(idxCond,:);
-    dataRAW_c = dataMat(idxCond, :);
-
-    % === 1. CALCUL DU WCSS (DÉMARRE À K=1) ===
-    kRange_wcss = 1:min(10, max(2, nCond-1)); 
-    wcss_v_c = zeros(size(kRange_wcss));
-    for kk = 1:numel(kRange_wcss)
-        k_tmp = kRange_wcss(kk);
-        [~, ~, sumD] = kmeans(pcs_c, k_tmp, 'Replicates', 10, 'MaxIter', 200, 'Display', 'off');
-        wcss_v_c(kk) = sum(sumD); 
-    end
-
-    % === 2. SÉLECTION ROBUSTE DE K (APPEL FONCTION ORIGINALE) ===
-    % On utilise tes 5 arguments habituels pour éviter l'erreur "Too many output arguments"
-    [sil_v_c, ch_v_c, db_v_c, gap_v_c, gap_th_c] = criteria_curves(pcs_c, kRange_c);
-    ari_mean_c = bootstrap_ari(pcs_c, kRange_c, 80);
-
-    % Calcul du vote (Pondération identique au Global)
-    sil_n = rescale(sil_v_c, 0, 1);
-    ch_n  = rescale(ch_v_c, 0, 1);
-    db_n  = 1 - rescale(db_v_c, 0, 1);
-    gap_n = rescale(gap_v_c, 0, 1);
-    ari_n = rescale(ari_mean_c, 0, 1);
-    score_c_vote = 0.30*sil_n + 0.20*ch_n + 0.20*db_n + 0.10*gap_n + 0.20*ari_n;
-    
-    [~, best_idx_c] = max(score_c_vote);
-    k_c = kRange_c(best_idx_c); 
-
-    % === 3. FIGURE DE SÉLECTION (DESIGN IDENTIQUE AU GLOBAL : tiledlayout 3x1) ===
-    fig_elbow_cond = figure('Color','w', 'Position', [100 100 800 850], 'Name', "Selection K - " + cond);
-    tiledlayout(3,1,'TileSpacing','compact','Padding','compact');
-
-    % 1) WCSS (Elbow)
-    nexttile;
-    plot(kRange_wcss, wcss_v_c, '-o', 'LineWidth', 1.6); grid on;
-    ylabel('WCSS');
-    title(sprintf('k-selection (%s): Elbow + Silhouette + Stability (ARI)', cond));
-    xlim([1 max(kRange_c)]);
-    hold on; xline(k_c, '--k', sprintf('k^*=%d', k_c), 'LabelVerticalAlignment', 'bottom');
-
-    % 2) Silhouette
-    nexttile;
-    plot(kRange_c, sil_v_c, '-o', 'LineWidth', 1.6); grid on;
-    ylabel('Mean silhouette');
-    xlim([min(kRange_c) max(kRange_c)]);
-    hold on; xline(k_c, '--k', 'HandleVisibility', 'off');
-
-    % 3) ARI bootstrap
-    nexttile;
-    plot(kRange_c, ari_mean_c, '-o', 'LineWidth', 1.6); grid on;
-    ylabel('ARI (bootstrap mean)');
-    xlabel('Number of clusters (k)');
-    xlim([min(kRange_c) max(kRange_c)]);
-    hold on; xline(k_c, '--k', 'HandleVisibility', 'off');
-
-    exportgraphics(fig_elbow_cond, fullfile(outdir, "03a_Elbow_Sil_ARI_" + cond + "_" + ts + ".png"), 'Resolution', 300);
-
-    % === 4. CLUSTERING FINAL & EXPORT POUR R ===
-    rng(42);
-    [idxC, CcC_npc] = kmeans(pcs_c, k_c, 'Replicates', 50, 'MaxIter', 500, 'Display', 'off');
-    CcC_pc12 = CcC_npc(:, 1:2);
-
-    % Export CSV pour les médianes/IQR dans R (On garde Participant pour la jointure)
-    FinalTable_Cond = [meta_c, table(idxC, 'VariableNames', {'ClusterID'}), array2table(dataRAW_c, 'VariableNames', allVars)];
-    out_R_cond = fullfile(outdir, "DATA_FOR_STATS_R_" + cond + "_" + ts + ".csv");
-    writetable(FinalTable_Cond, out_R_cond);
-    fprintf('✅ Condition %s : k=%d séléctionné. Export : %s\n', cond, k_c, out_R_cond);
-
-    % === 5. VISUALISATION DES CLUSTERS (SCATTER PC1-PC2) ===
-    figc = figure('Color','w'); hold on;
-    scatter(pcs_c_viz(:,1), pcs_c_viz(:,2), 42, meta_c.AgeMonths/12, 'filled');
-    colormap(parula); cb = colorbar; cb.Label.String = 'age (years)';
-    xlabel(sprintf('PC1 (%.1f%%)', expl1)); ylabel(sprintf('PC2 (%.1f%%)', expl2));
-    title(sprintf('%s - PC1–PC2 - Clustering (k=%d)', cond, k_c)); grid on;
-
-    colsC = lines(k_c);
-    for ic = 1:k_c
-        pts = pcs_c_viz(idxC==ic,:);
-        if size(pts,1) >= 3
-            K = convhull(pts(:,1), pts(:,2));
-            plot(pts(K,1), pts(K,2), '-', 'Color', colsC(ic,:), 'LineWidth', 1.5);
-        end
-    end
-    plot(CcC_pc12(:,1), CcC_pc12(:,2), 'kx', 'MarkerSize', 12, 'LineWidth', 2);
-
-    % Annotations d'âge sur le graphique
-    AgeStats_c = annotate_age_on_clusters(gca, pcs_c_viz, idxC, CcC_pc12, meta_c.AgeMonths);
-    exportgraphics(figc, fullfile(outdir, "B03_PC1PC2_AgeGradient_"+cond+"_k"+k_c+"_"+ts+".png"), 'Resolution', 300);
-
-    % === 6. PROFILS, COHEN'S D & HEATMAPS ===
-    [meanZ_c, meanRAW_c, cohenD_c, statsTable_c] = cluster_profiles_and_stats(dataRAW_c, Xnorm_c, idxC, allVars);
-
-    fig_heat_c = figure('Color','w');
-    heatmap_data_c = table2array(meanZ_c);
-    clim_c = max(abs(heatmap_data_c(:)));
-    rowLabels_c = arrayfun(@(ic) sprintf('C%d (n=%d, %.1f ans)', ic, sum(idxC==ic), AgeStats_c.AgeMonths_mean(ic)/12), 1:k_c, 'UniformOutput', false);
-    h_c = heatmap(allVars_disp, rowLabels_c, heatmap_data_c, ...
-        'Title', sprintf('Mean z-score profiles — %s (k=%d)', cond, k_c), ...
-        'Colormap', blueyellow(256), 'ColorLimits', [-clim_c, clim_c]);
-    exportgraphics(fig_heat_c, fullfile(outdir, "B04_Heatmap_Profils_"+cond+"_k"+k_c+"_"+ts+".png"), 'Resolution', 300);
-
-    % --- Sauvegardes CSV de traçabilité ---
-    writetable(AgeStats_c, fullfile(outdir, "B5_Age_Stats_"+cond+"_"+ts+".csv"));
-    writetable(statsTable_c, fullfile(outdir, "B9_Stats_omnibus_"+cond+"_"+ts+".csv"));
-    Trace_c = table(meta_c.Participant, meta_c.Condition, meta_c.AgeMonths, meta_c.AgeGroup, idxC, 'VariableNames', {'Participant','Condition','AgeMonths','AgeGroup','Cluster'});
-    writetable(Trace_c, fullfile(outdir, "B10_ClusterTraceability_"+cond+"_"+ts+".csv"));
-end
 
 %% ===================== FONCTIONS LOCALES =====================
 

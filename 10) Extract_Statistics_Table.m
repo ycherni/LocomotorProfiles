@@ -1,16 +1,10 @@
-%% ANALYSES STATISTIQUES AUTOMATISÉES - MODÈLES LINÉAIRES MIXTES (LMM)
-% Design: Surface (mesures répétées) × Groupe d'âge (inter-sujets)
-% Objectifs de correction:
-% 1) Interaction: obtenir F/DF/p (pas de NaN) -> test global via coefTest
-% 2) Reporter REML vs ML + DFMethod -> paramètres fixés et sauvegardés
-% 3) Garder random intercept seul -> (1|Participant)
-% 4) Clarifier FDR -> FDR appliquée séparément par "famille" d'effets (Surface / AgeGroup / Interaction)
+%% OBTENTION DU FICHIER FORMAT LONG POUR ANALYSE STATISTIQUES
 
 clc; clear; close all;
 
 %% =============== Chargement des données ===============
-cd('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result');
-load('SpatioTemporalDATA.mat');   % doit contenir SpatioTemporalDATA
+cd('XX'); % vers fichier .mat après extraction de la matrice de données
+load('SpatioTemporalDATA.mat');  
 
 % Dossier de sortie
 stats_path = fullfile(pwd, 'Statistical_Analysis_LMM');
@@ -179,7 +173,7 @@ prep_path = fullfile(stats_path, 'Prepared_Data');
 if ~exist(prep_path, 'dir'), mkdir(prep_path); end
 
 save(fullfile(prep_path, 'DATA_all_prepared.mat'), 'DATA_all', '-v7.3');
-fprintf('✓ DATA_all_prepared.mat sauvegardé\n');
+fprintf('DATA_all_prepared.mat sauvegardé\n');
 
 DATA_all_csv = DATA_all;
 varsCat = varfun(@iscategorical, DATA_all_csv, 'OutputFormat', 'uniform');
@@ -188,7 +182,7 @@ for k = 1:numel(catNames)
     DATA_all_csv.(catNames{k}) = string(DATA_all_csv.(catNames{k}));
 end
 writetable(DATA_all_csv, fullfile(prep_path, 'DATA_all_prepared.csv'));
-fprintf('✓ DATA_all_prepared.csv sauvegardé\n');
+fprintf('DATA_all_prepared.csv sauvegardé\n');
 
 %% AJOUT DES VARIABLES INCLUS DANS CALCUL DU GVI ============================================================
 %  Ajout StepTime (s), StanceTime (s), SwingTime (s) dans un CSV
@@ -196,14 +190,11 @@ fprintf('✓ DATA_all_prepared.csv sauvegardé\n');
 %   - StepTime(s)  = 60 / Cadence(steps/min)
 %   - StanceTime(s)= StrideTime(s) * pctToeOff/100
 %   - SwingTime(s) = StrideTime(s) - StanceTime(s)
-%
-%  IMPORTANT : dans ton CSV, pctToeOff est stocké sous
-%  "Mean_pctToeOff" (en %). Le code l’utilise tel quel.
 % ============================================================
 
 clc; clear; close all;
 
-folder = "C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\Statistical_Analysis_LMM\Prepared_Data";
+folder = "\Statistical_Analysis_LMM\Prepared_Data";
 inFile  = fullfile(folder, "DATA_all_prepared.csv");
 outFile = fullfile(folder, "ACP_Clustering_DATA.csv");
 
@@ -223,7 +214,7 @@ Mean_StepTime_s  = 60 ./ cadence;
 Mean_StanceTime_s = strideT_s .* (pctTO ./ 100);
 Mean_SwingTime_s  = strideT_s - Mean_StanceTime_s;
 
-% --- Nettoyage robuste (valeurs non finies / incohérentes) ---
+% --- Nettoyage (valeurs non finies / incohérentes) ---
 badCad = ~isfinite(cadence) | cadence <= 0;
 Mean_StepTime_s(badCad) = NaN;
 
@@ -233,7 +224,7 @@ badPct = ~isfinite(pctTO) | pctTO < 0 | pctTO > 100;
 Mean_StanceTime_s(badStride | badPct) = NaN;
 Mean_SwingTime_s(badStride | badPct)  = NaN;
 
-% Si swing/stance deviennent négatifs (incohérence), on met NaN
+% Si swing/stance deviennent négatifs, on met NaN
 Mean_StanceTime_s(Mean_StanceTime_s < 0) = NaN;
 Mean_SwingTime_s(Mean_SwingTime_s < 0)   = NaN;
 

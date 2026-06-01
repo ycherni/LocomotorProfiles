@@ -1,12 +1,9 @@
-% Ce script demande un fichier c3d et l'analyse.
-% En sortie, il y a un fichier excel dans le format demandé par le projet
-
 % Normal header
 clc
 clear
 close all;
 
-cd('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI')
+cd('XX')
 
 addpath('Libs');
 addpath(genpath('functions'));

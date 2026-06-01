@@ -7,7 +7,7 @@ close all;
 
 % Configuration générale
 conditions = {'Plat', 'Medium', 'High'};
-folder_path = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\matfiles\ALL';
+folder_path = 'XX';
 cd(folder_path);
 
 % Chargement des valeurs L0 pour tous les participants
@@ -16,7 +16,7 @@ g = 9.81;
 
 % Liste des participants à traiter (peut être automatiquement générée)
 % participants = keys(l0_map); % Récupère automatiquement tous les participants du fichier L0
-participants = {'CTL_78';'CTL_79'; 'CTL_80'}; % Si besoin de changer qu'un seul participant, commentez la ligne au dessus
+participants = {'XX'}; % Si besoin de changer qu'un seul participant, commentez la ligne au dessus
 
 % Boucle pour chaque participant
 for p = 1:length(participants)

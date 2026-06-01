@@ -1,29 +1,29 @@
 %% === CALCUL SPARC/LDLJ - COM vs STERNUM ===
-% Segmentation de chaque essai du 1er au dernier HS
-% Recommandation des calculs par Balasubramanian et al. 2015
+% calculs SPARC basé sur Balasubramanian et al. 2015 (lien de son github
+% plus bas)
 
 clear; clc; close all;
 
 % === CHEMINS ET PARAMÈTRES ===
-addpath(genpath('C:\Users\silve\OneDrive - Universite de Montreal\Silvere De Freitas - PhD - NeuroBiomech\Scripts\btk'));    
-addpath(genpath('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\functions'));
+addpath(genpath('XX')); % btk
+addpath(genpath('XX')); % fonctions
 
-sujet_id  = 'CTL_80';
+sujet_id  = 'XXX';
 surfaces  = {'Plat', 'Medium', 'High'};
-essais    = 1:5; 
-base_dir  = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\Data\jeunes_enfants'; % Pensez à changer le répertoire d'âge ici!
+essais    = 1:10; 
+base_dir  = 'X'; % Pensez à changer le répertoire d'âge ici!
 
 freqVicon = 100;
 fc_filter = 6;
 
-output_csv = sprintf('C:\\Users\\silve\\Desktop\\DOCTORAT\\UNIV MONTREAL\\TRAVAUX-THESE\\Surfaces_Irregulieres\\Datas\\Script\\gaitAnalysisGUI\\result\\Smoothness\\Smoothness_TrialBased_%s.csv', sujet_id);
-output_mat = sprintf('C:\\Users\\silve\\Desktop\\DOCTORAT\\UNIV MONTREAL\\TRAVAUX-THESE\\Surfaces_Irregulieres\\Datas\\Script\\gaitAnalysisGUI\\result\\Smoothness\\Smoothness_TrialBased_%s.mat', sujet_id);
+output_csv = sprintf('\\Smoothness_TrialBased_%s.csv', sujet_id);
+output_mat = sprintf('\\Smoothness_TrialBased_%s.mat', sujet_id);
 
 % === INITIALISATION ===
 results    = table();
 log_errors = {};
 fft_log    = table();  % journal FFT (N, K, df...) par essai
-fprintf('🔄 Analyse de fluidité PAR ESSAI, du 1er au dernier HeelStrike, pour %s...\n\n', sujet_id);
+fprintf('Analyse de fluidité PAR ESSAI, du 1er au dernier HeelStrike, pour %s...\n\n', sujet_id);
 fprintf('Colonne 1 : axe ML; colonne 2 : axe AP; colonne 3 : axe V\n');
 
 % Filtre passe-bas
@@ -38,13 +38,13 @@ for surf_idx = 1:length(surfaces)
         c3d_path = fullfile(base_dir, filename);
 
         if ~isfile(c3d_path)
-            msg = sprintf('❌ Fichier manquant : %s', filename);
+            msg = sprintf('Fichier manquant : %s', filename);
             log_errors{end+1} = msg;
             fprintf('%s\n', msg);
             continue;
         end
         
-        fprintf('📂 Traitement : %s\n', filename);
+        fprintf('Traitement : %s\n', filename);
         
         try
             % Lecture C3D
@@ -55,7 +55,7 @@ for surf_idx = 1:length(surfaces)
             try
                 COM = calculate_pelvic_COM(markers);   % [N x 3]
             catch
-                msg = sprintf('❌ %s : COM impossible (markers manquants ou invalides)', filename);
+                msg = sprintf(' %s : COM impossible (markers manquants ou invalides)', filename);
                 log_errors{end+1} = msg;
                 fprintf('%s\n', msg);
                 btkCloseAcquisition(data);
@@ -66,7 +66,7 @@ for surf_idx = 1:length(surfaces)
             if isfield(markers,'STRN')
                 STERN = markers.STRN;     % [N x 3]
             else
-                msg = sprintf('⚠️ %s : marqueur STRN absent, indices STERN mis à NaN', filename);
+                msg = sprintf(' %s : marqueur STRN absent, indices STERN mis à NaN', filename);
                 log_errors{end+1} = msg;
                 fprintf('%s\n', msg);
                 STERN = NaN(size(COM));
@@ -105,7 +105,7 @@ for surf_idx = 1:length(surfaces)
             end
 
             n_cycles = NaN;
-            fprintf('   📏 Analyse entre 1er HS et dernier HS (frames %d à %d)\n', start_frame, end_frame);
+            fprintf('   Analyse entre 1er HS et dernier HS (frames %d à %d)\n', start_frame, end_frame);
 
             % === FILTRAGE POSITION ===
             COM_filt   = filtfilt(b, a, COM);
@@ -136,7 +136,7 @@ for surf_idx = 1:length(surfaces)
             fields_COM = fieldnames(smooth_COM);
             for f = 1:length(fields_COM)
                 if ~isscalar(smooth_COM.(fields_COM{f}))
-                    msg = sprintf('⚠️ %s : COM Champ %s non scalaire → NaN', filename, fields_COM{f});
+                    msg = sprintf('️ %s : COM Champ %s non scalaire → NaN', filename, fields_COM{f});
                     log_errors{end+1} = msg;
                     fprintf('%s\n', msg);
                     smooth_COM.(fields_COM{f}) = NaN;
@@ -146,7 +146,7 @@ for surf_idx = 1:length(surfaces)
             fields_STERN = fieldnames(smooth_STERN);
             for f = 1:length(fields_STERN)
                 if ~isscalar(smooth_STERN.(fields_STERN{f}))
-                    msg = sprintf('⚠️ %s : STERN Champ %s non scalaire → NaN', filename, fields_STERN{f});
+                    msg = sprintf(' %s : STERN Champ %s non scalaire → NaN', filename, fields_STERN{f});
                     log_errors{end+1} = msg;
                     fprintf('%s\n', msg);
                     smooth_STERN.(fields_STERN{f}) = NaN;
@@ -177,60 +177,30 @@ for surf_idx = 1:length(surfaces)
             results = [results; struct2table(new_row)];
 
             btkCloseAcquisition(data);
-            fprintf('   ✅ Essai traité : durée %.1f sec\n\n', new_row.Duration_sec);
+            fprintf('  Essai traité : durée %.1f sec\n\n', new_row.Duration_sec);
             
         catch ME
-            msg = sprintf('❌ %s : %s', filename, ME.message);
+            msg = sprintf(' %s : %s', filename, ME.message);
             log_errors{end+1} = msg;
             fprintf('%s\n\n', msg);
-            try, btkCloseAcquisition(data); end %#ok<TRYNC>
+            try btkCloseAcquisition(data); end
         end
     end
 end
 
 % === SAUVEGARDE ===
-fprintf('💾 Sauvegarde...\n');
+fprintf(' Sauvegarde...\n');
 
 writetable(results, output_csv);
 
 save(output_mat, 'results', 'log_errors', 'fft_log');
 
 nTrials = height(results);
-fprintf('📊 Total essais traités : %d\n', nTrials);
-fprintf('\n💡 PROCHAINE ÉTAPE : Lancer SpatioTemporal_Analysis.m\n');
+fprintf(' Total essais traités : %d\n', nTrials);
+fprintf('\n PROCHAINE ÉTAPE : Lancer SpatioTemporal_Analysis.m\n');
 
 %% === VISUALISATION FFT COM (MAGNITUDE) – Essai voulu ===
 plot_fft_COM_magnitude_trial(base_dir, sujet_id, surfaces, 3, freqVicon, fc_filter); % changer chiffre pour changer essai
-
-%% === FIGURES COMPARATIVES COM vs STERN ===
-
-% Familles d'indices et directions
-families   = {'SPARC', 'LDLJ'};
-directions = {'Magnitude', 'AP', 'ML', 'V'};
-
-metrics_to_plot = {};
-
-for f = 1:numel(families)
-    for d = 1:numel(directions)
-        metrics_to_plot{end+1} = sprintf('%s_%s', families{f}, directions{d});
-    end
-end
-
-% Boucle sur toutes les métriques disponibles
-for m = 1:numel(metrics_to_plot)
-    metricName = metrics_to_plot{m};
-    % On trace seulement si les colonnes existent vraiment
-    comField   = ['COM_'   metricName];
-    sternField = ['STERN_' metricName];
-
-    if ismember(comField, results.Properties.VariableNames) && ...
-       ismember(sternField, results.Properties.VariableNames)
-        plot_COM_vs_STERN(results, metricName);
-    else
-        fprintf('⏭️  Skip %s (champs %s ou %s absents)\n', ...
-            metricName, comField, sternField);
-    end
-end
 
 %% ============================== FONCTIONS ==============================
 
@@ -421,7 +391,7 @@ function plot_fft_COM_magnitude_trial(base_dir, sujet_id, surfaces, essai, fs, f
         c3d_path = fullfile(base_dir, filename);
 
         if ~isfile(c3d_path)
-            fprintf('❌ Manquant: %s\n', filename);
+            fprintf(' Manquant: %s\n', filename);
             continue;
         end
 
@@ -464,7 +434,6 @@ function plot_fft_COM_magnitude_trial(base_dir, sujet_id, surfaces, essai, fs, f
             seg_COM = vel_COM(start_frame:end_frame, :);
             v_mag   = sqrt(sum(seg_COM.^2, 2));
 
-            % IMPORTANT: mean retiré dans compute_spectrum -> ne pas le refaire ici
             [freqs, Vn] = compute_spectrum(v_mag, fs);
 
             idx = freqs <= 12;
@@ -475,7 +444,7 @@ function plot_fft_COM_magnitude_trial(base_dir, sujet_id, surfaces, essai, fs, f
 
         catch ME
             warning('Erreur %s : %s', filename, ME.message);
-            try, btkCloseAcquisition(data); end %#ok<TRYNC>
+            try btkCloseAcquisition(data); end
         end
     end
 

@@ -9,7 +9,7 @@ clc; clear; close all;
 
 % Configuration
 conditions = {'Plat', 'Medium', 'High'};
-folder_path = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\matfiles\ALL';
+folder_path = 'XX';
 cd(folder_path);
 
 % Charger L0
@@ -18,7 +18,7 @@ participants = keys(l0_map);
 
 % === OPTION : traiter 1, plusieurs ou tous les participants ===
 RUN_ONLY_SOME = true;   % false = traiter tous les participants
-PARTICIPANTS_TO_RUN = {'CTL_78', 'CTL_79', 'CTL_80'};  % <--- liste de 1 ou plusieurs participant(s)
+PARTICIPANTS_TO_RUN = {'XX'};  % <--- liste de 1 ou plusieurs participant(s)
 
 if RUN_ONLY_SOME
     % Vérifier que tous les IDs existent
@@ -67,7 +67,7 @@ for p = 1:length(participants)
         filename = [participant '_' cond '.mat'];
         
         if ~isfile(filename)
-            fprintf('  ⚠️  Fichier manquant : %s\n', filename);
+            fprintf('   Fichier manquant : %s\n', filename);
             files_exist = false;
             break;
         end
@@ -78,7 +78,7 @@ for p = 1:length(participants)
         cycle_counts.(cond).Right = length(c.resultsAll.kin.Right);
         cycle_counts.(cond).Total = cycle_counts.(cond).Left + cycle_counts.(cond).Right;
         
-        fprintf('  📊 %s : Left=%d, Right=%d, Total=%d\n', ...
+        fprintf('   %s : Left=%d, Right=%d, Total=%d\n', ...
             cond, cycle_counts.(cond).Left, cycle_counts.(cond).Right, ...
             cycle_counts.(cond).Total);
     end
@@ -105,9 +105,9 @@ for p = 1:length(participants)
         min_total, min_left_available, min_right_available, ...
         TARGET_LEFT_RIGHT_RATIO, TOLERANCE);
     
-    fprintf('  ✂️  Cycles à conserver : Left=%d, Right=%d (Total=%d)\n', ...
+    fprintf('  Cycles à conserver : Left=%d, Right=%d (Total=%d)\n', ...
         n_left_target, n_right_target, n_left_target + n_right_target);
-    fprintf('  📐 Ratio obtenu : %.1f%% Left / %.1f%% Right\n', ...
+    fprintf('  Ratio obtenu : %.1f%% Left / %.1f%% Right\n', ...
         (n_left_target/(n_left_target+n_right_target))*100, ...
         (n_right_target/(n_left_target+n_right_target))*100);
     
@@ -131,7 +131,6 @@ for p = 1:length(participants)
         
         % Sélection aléatoire avec seed spécifique pour cette condition et
         % ce participant
-        % (pour garantir la reproductibilité)
         base_participant_seed = stable_seed_from_id(participant, RANDOM_SEED);
         participant_seed = base_participant_seed + iC*10; 
 
@@ -141,10 +140,10 @@ for p = 1:length(participants)
             selected_idx_left = select_cycles_random(...
                 c.resultsAll.kin.Left, n_left_target, participant_seed);
             c.resultsAll.kin.Left = c.resultsAll.kin.Left(selected_idx_left);
-            fprintf('  ✅ %s Left : %d → %d cycles (seed=%d)\n', ...
+            fprintf('  %s Left : %d → %d cycles (seed=%d)\n', ...
                 cond, cycle_counts.(cond).Left, n_left_target, participant_seed);
         elseif cycle_counts.(cond).Left < n_left_target
-            fprintf('  ⚠️  %s Left : %d cycles disponibles (< %d demandés)\n', ...
+            fprintf('  %s Left : %d cycles disponibles (< %d demandés)\n', ...
                 cond, cycle_counts.(cond).Left, n_left_target);
         end
         
@@ -153,10 +152,10 @@ for p = 1:length(participants)
             selected_idx_right = select_cycles_random(...
                 c.resultsAll.kin.Right, n_right_target, participant_seed + 1);
             c.resultsAll.kin.Right = c.resultsAll.kin.Right(selected_idx_right);
-            fprintf('  ✅ %s Right : %d → %d cycles (seed=%d)\n', ...
+            fprintf('  %s Right : %d → %d cycles (seed=%d)\n', ...
                 cond, cycle_counts.(cond).Right, n_right_target, participant_seed + 1);
         elseif cycle_counts.(cond).Right < n_right_target
-            fprintf('  ⚠️  %s Right : %d cycles disponibles (< %d demandés)\n', ...
+            fprintf('  %s Right : %d cycles disponibles (< %d demandés)\n', ...
                 cond, cycle_counts.(cond).Right, n_right_target);
         end
         
@@ -178,7 +177,7 @@ for p = 1:length(participants)
         save(filename, 'c', '-v7.3');
     end
     
-    fprintf('  ✅ %s : Égalisation terminée\n\n', participant);
+    fprintf('  %s : Égalisation terminée\n\n', participant);
 end
 
 %% === RÉSUMÉ ET STATISTIQUES ===
@@ -220,9 +219,9 @@ fprintf('  Participants dans la tolérance (±%.0f%%) : %d/%d (%.1f%%)\n', ...
     TOLERANCE*100, sum(within_tolerance), length(within_tolerance), ...
     (sum(within_tolerance)/length(within_tolerance))*100);
 
-fprintf('\n✅ Égalisation terminée pour %d participants\n', length(participants));
-fprintf('🔄 Reproductibilité garantie avec seed=%d\n', RANDOM_SEED);
-fprintf('\n💡 PROCHAINE ÉTAPE : Lancer MOS.m\n');
+fprintf('\n Égalisation terminée pour %d participants\n', length(participants));
+fprintf('Reproductibilité garantie avec seed=%d\n', RANDOM_SEED);
+fprintf('\n PROCHAINE ÉTAPE : Lancer MOS.m\n');
 
 %% ========== FONCTIONS ==========
 

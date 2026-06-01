@@ -6,17 +6,17 @@ clc;
 clear;
 close all;
 
-cd('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\matfiles\ALL')
-addpath(genpath('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\functions'))
-addpath(genpath('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script'))
+cd('XX') %.mat
+addpath(genpath('XX')) %fonctions
+addpath(genpath('XX')) % répertoire des codes
 
 % Dossier où sont sauvegardés les résultats MoS et SPARC par participant
-mos_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\MoS';
-smooth_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\Smoothness';
-gvi_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\GVI\GVI_AllSurfaces_RefAdultsPlat'; % Attention à bien mettre cela à jour
+mos_dir = '\MoS';
+smooth_dir = '\Smoothness';
+gvi_dir = '\GVI\GVI_AllSurfaces_RefAdultsPlat'; 
 
 % Chemin de sauvegarde
-save_path = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result';
+save_path = 'XX';
 if ~exist(save_path, 'dir')
     mkdir(save_path);
 end
@@ -87,8 +87,6 @@ for g = 1:length(groupNames)
         fprintf('  Condition : %s\n', cond);
         
         % Préallocation d’un tableau de structs
-        % recapRows = repmat(struct(), 1, length(participants));
-        % rowIdx = 1;
         rowIdx = 1;
         recapRows = {};
 
@@ -196,7 +194,7 @@ end
                 for f = 1:length(statsFields)
                     fname = statsFields{f};
 
-                    % Extraction robuste (insensible à la casse)
+                    % Extraction
                     if contains(fname, '_Mean_Mean', 'IgnoreCase', true)
                         % On enlève le suffixe pour garder la racine (ex: pctToeOff)
                         shortName = regexprep(fname, '_Mean_Mean$', '', 'ignorecase');
@@ -352,7 +350,7 @@ for iC = 1:length(Condition)
 end
 
 % === RENOMMAGE DES VARIABLES POUR CHAQUE GROUPE ===
-groupList = {'JeunesEnfants', 'Enfants', 'Adolescents', 'Adultes'}; % adapte selon tes groupes présents
+groupList = {'JeunesEnfants', 'Enfants', 'Adolescents', 'Adultes'};
 
 for iC = 1:length(Condition)
     cond = Condition{iC};
@@ -443,7 +441,7 @@ for p = 1:length(prefixes)
         varNameReadable = renameMapExport(varTech);
         varFull = [prefix varNameReadable];  % ex: Mean_Gait speed (m.s^{-1})
 
-        % Initialisation - CORRECTION ICI
+        % Initialisation
         exportData = table();
         exportRowIndex = 1;
         
@@ -472,7 +470,7 @@ for p = 1:length(prefixes)
                                 end
                             end
                         end
-                        break; % On n'a besoin que d'une condition pour avoir la liste
+                        break;
                     end
                 end
             end
@@ -527,9 +525,9 @@ for p = 1:length(prefixes)
             safeFileName = matlab.lang.makeValidName([prefix '_' varNameReadable]);
             csvPath = fullfile(csv_export_path, [safeFileName '.csv']);
             writetable(exportData, csvPath);
-            fprintf('✅ Export format large : %s (%d participants)\n', csvPath, height(exportData));
+            fprintf(' Export format large : %s (%d participants)\n', csvPath, height(exportData));
         else
-            fprintf('⚠️  Aucune donnée trouvée pour : %s\n', varFull);
+            fprintf('  Aucune donnée trouvée pour : %s\n', varFull);
         end
     end
 end
@@ -576,7 +574,7 @@ end
 disp('=== RÉSULTATS ===');
 disp('Structure SpatioTemporalDATA sauvegardée avec succès.');
 
-fprintf('\n💡 Plusieurs options désormais : Soit lancer Statisctics_SpatioTemporal_Parameters.m, soit Clustering.m, soit dresser des plots ci-dessous\n');
+fprintf('\n Plusieurs options désormais : Soit lancer Statisctics_SpatioTemporal_Parameters.m, soit Clustering.m, soit dresser des plots ci-dessous\n');
 
 %% RADAR PLOTS 5 DOMAINES - INTER ET INTRA -GROUPES
 clc; clear; close all;

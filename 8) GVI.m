@@ -15,8 +15,8 @@
 clc; clear; close all;
 
 %% === PATHS ===
-mat_dir   = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\matfiles\ALL';
-root_dir  = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI';
+mat_dir   = 'XX'; %.mat 
+root_dir  = '';
 func_dir  = fullfile(root_dir,'functions');
 
 addpath(genpath(root_dir));
@@ -30,10 +30,10 @@ if ~exist(outdir,'dir'); mkdir(outdir); end
 ts = char(datetime('now','Format','yyyyMMdd_HHmm'));
 
 %% === GROUPES (référence) ===
-ParticipantGroup; % doit créer Group.*, attention changer si MA base de données ou celle de MR
+ParticipantGroup;
 assert(exist('Group','var')==1, 'ParticipantGroup.m doit créer une variable Group.');
 
-refAdults = string(Group.Adultes(:));  % IDs adultes de ton étude
+refAdults = string(Group.Adultes(:));  % IDs adultes
 
 % Map participant -> groupe
 groupMap = containers.Map;
@@ -79,7 +79,7 @@ nCols = 2*nAlt;          % 36 = Left(18) + Right(18)
 allFiles = [];
 for s = 1:numel(surfaces)
     ff = dir(fullfile(mat_dir, sprintf('*_%s.mat', surfaces{s})));
-    allFiles = [allFiles; ff]; %#ok<AGROW>
+    allFiles = [allFiles; ff]; 
 end
 if isempty(allFiles)
     error('Aucun fichier *_{Plat|Medium|High}.mat trouvé dans %s', mat_dir);
@@ -385,7 +385,7 @@ fprintf('\n✅ Terminé. Résultats dans: %s\n', outdir);
 
 function series = build_gvi_series_from_struct(S)
 % S = kin.Left ou kin.Right
-% Cas attendu: S est un struct array 1×N, chaque élément = 1 cycle.
+% S est un struct array 1×N, chaque élément = 1 cycle.
 
     series = struct();
 
@@ -444,10 +444,6 @@ end
 
 function v = getvec_cycles(S, names)
 % Retourne un vecteur colonne (N×1) : 1 valeur = 1 cycle
-% Supporte:
-%  - S struct array 1×N (cas attendu) avec champs scalaires
-%  - S struct scalaire avec champs vecteurs
-
     v = [];
 
     for i = 1:numel(names)
@@ -494,9 +490,7 @@ function v = getvec_cycles(S, names)
 end
 
 function n = estimate_n_cycles(S)
-% Estime n cycles :
-% - si struct array -> numel(S)
-% - sinon -> longueur max des champs numériques vecteurs
+% Estime n cycles
 
     if isstruct(S) && numel(S) > 1
         n = numel(S);

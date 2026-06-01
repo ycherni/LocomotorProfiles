@@ -4,13 +4,13 @@
 
 clc; clear; close all;
 
-% === CHEMIN DE SAUVEGARDE ===
-save_path = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\Statistical_Analysis_LMM\Stats_Descriptives';
+% === SAVE PATHS ===
+save_path = 'XXX';
 
-mat_file = fullfile(save_path, 'participants_metadata_MR.mat');
-csv_file = fullfile(save_path, 'participants_metadata_MR.csv');
+mat_file = fullfile(save_path, 'XX');
+csv_file = fullfile(save_path, 'XX');
 
-% === CHARGER OU CREER ===
+% === LOAD OR CREATE ===
 if isfile(mat_file)
     load(mat_file, 'T');
     fprintf('Fichier participants_metadata.mat chargé.\n');
@@ -21,7 +21,7 @@ else
     fprintf('Nouvelle table participants_metadata créée.\n');
 end
 
-% === AJOUT / MISE A JOUR : PLUSIEURS PARTICIPANTS ===
+% === ADD/UPDATE : PARTICIPANTS ===
 newRows = table( ...
     ["CTL_01"; "CTL_02"; "CTL_03"; "CTL_04"; "CTL_05"; "CTL_06"; "CTL_07"; "CTL_08"; "CTL_09"; "CTL_10";
     "CTL_11"; "CTL_12"; "CTL_13"; "CTL_14"; "CTL_15"; "CTL_16"; "CTL_17"; "CTL_18"; "CTL_19"; "CTL_20";
@@ -93,12 +93,12 @@ newRows = table( ...
 ...
     'VariableNames', {'Participant','AgeGroup','AgeMonths','Sex','Height_cm','Weight_kg','L0_m'} );
 
-% === Harmoniser les colonnes newRows
+% === IMC ===
 if ~ismember("IMC", string(newRows.Properties.VariableNames))
     newRows.IMC = nan(height(newRows),1);
 end
 
-% Option robuste : forcer le même ordre de colonnes que T
+% Rows in the same order than T
 newRows = newRows(:, T.Properties.VariableNames);
 
 for i = 1:height(newRows)
@@ -114,12 +114,12 @@ for i = 1:height(newRows)
     end
 end
 
-% === NETTOYAGE / TRI ===
+% === CLEANING ===
 T = sortrows(T, "Participant");
 
 T.IMC = T.Weight_kg ./ ((T.Height_cm/100).^2);
 
-% === SAUVEGARDES ===
+% === SAVE ===
 save(mat_file, 'T');
 writetable(T, csv_file);
 

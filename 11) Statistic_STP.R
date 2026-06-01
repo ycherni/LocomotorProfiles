@@ -15,7 +15,7 @@
 ## - Colonnes : Global (Sexe uniquement) + par AgeGroup
 ## =========================================================
 
-setwd("C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result")
+setwd("XX") # vers les résultats
 
 library(readr)
 library(dplyr)
@@ -26,7 +26,7 @@ library(janitor)
 library(performance)
 library(tidyverse)
 
-chemin <- "C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Statistical_Analysis_LMM"
+chemin <- "XX" #Vers la sortie des LMM
 
 # 0) Import + nettoyage des noms (snake_case)
 df <- read.csv(
@@ -266,7 +266,7 @@ ggsave("Figure_Anthro_Panel.png", anthro_panel, width = 10, height = 8, dpi = 30
 # ---------------------------------------------------------
 # 0) Préparation de l'environnement
 # ---------------------------------------------------------
-setwd('C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Statistical_Analysis_LMM/Prepared_Data')
+setwd('XX') # Chemin des résultats
 
 library(tidyverse)
 library(readr)
@@ -275,7 +275,7 @@ library(gt)
 # ---------------------------------------------------------
 # 1) Chargement du fichier de données
 # ---------------------------------------------------------
-file_path <- "C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Statistical_Analysis_LMM/Prepared_Data/ACP_Clustering_DATA.csv"   # adapter si besoin
+file_path <- "XX"   # Sur le CSV de la grande matrice
 
 # Lecture robuste (gère séparateur ; ou ,)
 first_line <- readLines(file_path, n = 1, warn = FALSE)
@@ -405,7 +405,7 @@ tab_wide <- desc %>%
   arrange(match(Variable, variables_interet))
 
 # ---------------------------------------------------------
-# 8) Fonction d'étiquetage "publication" (affichage seulement)
+# 8) Fonction d'étiquetage
 #    - retire "Mean_"
 #    - applique unités (mm, cm, m, s, %, %L0, ua, m/s, step/min)
 #    - CV -> "C.V ... (%)"
@@ -637,7 +637,7 @@ generate_gait_boxplot <- function(var_name, data) {
       position = position_dodge(0.85),
       size = 1.2, alpha = 0.3, color = "black"
     ) +
-    # Couleurs des âges (ajuste si tu veux une autre palette)
+    # Couleurs des âges
     scale_fill_manual(values = c(
       "Young Children" = "blue",
       "Children"       = "chocolate3",
@@ -834,7 +834,7 @@ make_median_connected_boxplot <- function(var_name, data) {
       fill  = "Age group"
     ) +
     
-    theme_minimal(base_size = 25) +          # ← base montée à 25
+    theme_minimal(base_size = 25) +         
     theme(
       plot.title         = element_text(face = "bold", hjust = 0.5, size = 25),
       panel.grid.minor   = element_blank(),
@@ -890,8 +890,8 @@ generate_domain_panel <- function(domain_name, var_list, data) {
     )
   
   # Dimensions agrandies pour absorber la police plus grande
-  fig_w <- n_cols * 8.0     # ← était 6.5
-  fig_h <- n_rows * 7.0 + 2.5  # ← était 5.5
+  fig_w <- n_cols * 8.0     
+  fig_h <- n_rows * 7.0 + 2.5  
   
   safe_name <- gsub("[^A-Za-z0-9_]", "_", domain_name)
   
@@ -1029,7 +1029,7 @@ draw_domain_background <- function(domains_by_var, domain_cols, alpha = 0.18, r 
   bounds <- angles - (pi / n)
   bounds <- c(bounds, bounds[1] + 2*pi)
   
-  # Pour regrouper les variables contiguës d'un même domaine
+  # Pour regrouper les variables d'un même domaine
   runs <- rle(domains_by_var)
   idx_end <- cumsum(runs$lengths)
   idx_start <- c(1, head(idx_end, -1) + 1)
@@ -1127,7 +1127,6 @@ create_surface_radar <- function(surf_name, df_full, vars, labels) {
   
   colnames(normalized_avg) <- labels
   
-  # Format attendu par fmsb::radarchart :
   final_radar_avg <- rbind(rep(1, length(vars)), rep(0, length(vars)), normalized_avg)
   
   # E) Normalisation des individus (0–1)
@@ -1196,8 +1195,6 @@ create_surface_radar <- function(surf_name, df_full, vars, labels) {
   )
   
   # === AFFICHAGE DES ÉTIQUETTES DE VALEURS RÉELLES ===
-  # CRITIQUE: Ceci doit être fait AVANT les par(new=TRUE) suivants
-  # car sinon le système de coordonnées change
   
   for (i in seq_len(nvar)) {
     angle <- angles[i]
@@ -1291,7 +1288,7 @@ for (s in c("Plat", "Medium", "High")) {
   create_surface_radar(s, df, vars_radar_present, radar_labels)
 }
 
-dev.off()   # <<< fermeture DU PDF uniquement
+dev.off()   
 
 
 # 15.9) Export PNG haute qualité (plus lisible) — sans modifier le PDF
@@ -1309,7 +1306,7 @@ for (s in c("Plat", "Medium", "High")) {
   # Marges plus petites => le radar prend plus de place
   par(mar = c(8, 5, 5, 5))     # bottom, left, top, right
   
-  # Pas de marge externe (sinon ça rétrécit le plot)
+  # Pas de marge externe
   par(oma = c(0, 0, 0, 0))
   
   # Evite que R rajoute une "expansion" d'axes qui réduit visuellement le cercle
@@ -2804,7 +2801,7 @@ library(stringr)
 library(effectsize)
 
 ## 2) Chargement et préparation des données
-csv_path <- "C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Statistical_Analysis_LMM/Prepared_Data/ACP_Clustering_DATA.csv"
+csv_path <- "XX" #Vers le csv de la matrice de données extraite
 
 first_line <- readLines(csv_path, n = 1, warn = FALSE)
 delim <- ifelse(grepl(";", first_line), ";", ",")
@@ -2886,7 +2883,7 @@ fit_one_variable <- function(var_name, data, p_adjust = "holm") {
   # Conversion en data.frame pour manipulation
   a_df_temp <- as.data.frame(a_raw)
   
-  # Extraction sécurisée des colonnes (évite l'erreur "objet introuvable")
+  # Extraction sécurisée des colonnes 
   get_col <- function(df, possible_names) {
     name <- intersect(possible_names, names(df))[1]
     if (is.na(name)) return(NA_real_)
@@ -3159,21 +3156,4 @@ walk(variables_to_test, ~ {
 
 message("✓ Terminée ! Les figures sont dans : ", plots_tri_dir)
 
-
-
-
-## ============================================================
-## 11) RÉCAPITULATIF CONSOLE
-## ============================================================
 message("\n=== ANALYSE TERMINÉE ===")
-message("ANOVA Type III + FDR: ", nrow(anova_all_fdr), " lignes")
-message("R² (Nakagawa) calculés pour: ", nrow(r2_all), " variables")
-message("\n--- POST-HOCS (4 analyses distinctes) ---")
-message("1) Effet GLOBAL Surface: ", nrow(posthoc_surface_global), " comparaisons")
-message("2) Effet GLOBAL Âge: ", nrow(posthoc_age_global), " comparaisons")
-message("3) Surface par Âge: ", nrow(posthoc_surface_within_age), " comparaisons")
-message("4) Âge par Surface: ", nrow(posthoc_age_within_surface), " comparaisons")
-message("\n--- FICHIERS EXPORTÉS ---")
-message("Fichier COMPLET: ", xlsx_path)
-message("Fichier SYNTHÈSE: ", xlsx_synthese)
-message("\n✓ Prêt pour la rédaction de la discussion !")

@@ -4,17 +4,17 @@
 
 clear; clc; close all;
 
-cd('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\matfiles\ALL') % Chemin vers map longueur de jambes
-addpath(genpath('C:\Users\silve\OneDrive - Universite de Montreal\Silvere De Freitas - PhD - NeuroBiomech\Scripts\btk'));    
-addpath(genpath('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\functions'));
+cd('XX') % Chemin vers map longueur de jambes
+addpath(genpath('XX')); % BTK
+addpath(genpath('XX')); % fonctions
 
 %% === PARAMÈTRES À MODIFIER ===
-sujet_id = 'CTL_80';                              % ID du sujet à traiter
+sujet_id = 'XX';                              % ID du sujet à traiter
 surfaces = {'Plat', 'Medium', 'High'};            % Surfaces étudiées
-essais = 1:5;                                    % Numéros des essais
-base_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\Data\jeunes_enfants';    % Dossier contenant les C3D
-output_file_csv = sprintf('C:\\Users\\silve\\Desktop\\DOCTORAT\\UNIV MONTREAL\\TRAVAUX-THESE\\Surfaces_Irregulieres\\Datas\\Script\\gaitAnalysisGUI\\result\\MoS\\MoS_results_%s.csv', sujet_id);
-output_file_mat = sprintf('C:\\Users\\silve\\Desktop\\DOCTORAT\\UNIV MONTREAL\\TRAVAUX-THESE\\Surfaces_Irregulieres\\Datas\\Script\\gaitAnalysisGUI\\result\\MoS\\MoS_results_%s.mat', sujet_id);
+essais = 1:10;                                    % Numéros des essais
+base_dir = 'XX';    % Dossier contenant les C3D
+output_file_csv = sprintf('\\MoS_results_%s.csv', sujet_id);
+output_file_mat = sprintf('\\MoS_results_%s.mat', sujet_id);
 
 % Fréquence d'acquisition
 freqVicon = 100;  % Fréquence Vicon (Hz)
@@ -47,11 +47,11 @@ for surf_idx = 1:length(surfaces)
         
         % Vérification de l'existence du fichier
         if ~isfile(c3d_path)
-            fprintf('⚠️  Fichier non trouvé : %s\n', filename);
+            fprintf('Fichier non trouvé : %s\n', filename);
             continue;
         end
         
-        fprintf('📂 Traitement : %s\n', filename);
+        fprintf('Traitement : %s\n', filename);
         
         try
             % Lecture du fichier C3D
@@ -124,11 +124,11 @@ ho = estimate_heel_off_pair(hs, to, markers, 'L');
 
 % Vérification de cohérence
 if ho <= hs || to <= ho
-    fprintf('   ⚠️  Cycle L%d ignoré (ordre incohérent: HS=%d, HO=%d, TO=%d)\n', i, hs, ho, to);
+    fprintf('   Cycle L%d ignoré (ordre incohérent: HS=%d, HO=%d, TO=%d)\n', i, hs, ho, to);
     continue;
 end
     
-    fprintf('   ✓ Cycle Gauche %d : HS=%d, HO=%d, TO=%d\n', i, hs, ho, to);
+    fprintf('   Cycle Gauche %d : HS=%d, HO=%d, TO=%d\n', i, hs, ho, to);
     
     try
         mos = calculate_MoS(c3d_path, hs, ho, to, L0_mm);
@@ -160,7 +160,7 @@ end
         
         results = [results; struct2table(new_row)];
     catch ME
-        fprintf('   ❌ Erreur cycle L%d : %s\n', i, ME.message);
+        fprintf('   Erreur cycle L%d : %s\n', i, ME.message);
     end
 end
 
@@ -175,21 +175,14 @@ to = valid_TO(1);
 ho = estimate_heel_off_pair(hs, to, markers, 'R');
 
 if ho <= hs || to <= ho
-    fprintf('   ⚠️  Cycle R%d ignoré (ordre incohérent: HS=%d, HO=%d, TO=%d)\n', i, hs, ho, to);
+    fprintf('   Cycle R%d ignoré (ordre incohérent: HS=%d, HO=%d, TO=%d)\n', i, hs, ho, to);
     continue;
 end
     
-    fprintf('   ✓ Cycle Droit %d : HS=%d, HO=%d, TO=%d\n', i, hs, ho, to);
+    fprintf('   Cycle Droit %d : HS=%d, HO=%d, TO=%d\n', i, hs, ho, to);
     
     try
         mos = calculate_MoS(c3d_path, hs, ho, to, L0_mm);
-
-%         % === DIAGNOSTIQUES VISUELS (à laisser ON le temps du debug) ===
-% try
-%     plot_mos_diagnostics(c3d_path, hs, ho, to, freqVicon);
-% catch ME_d
-%     warning('Diagnostics MoS non affichés (%s).', ME_d.message);
-% end
 
         % Ajout des résultats dans le tableau
         new_row = struct();
@@ -210,26 +203,26 @@ end
         
         results = [results; struct2table(new_row)];
     catch ME
-        fprintf('   ❌ Erreur cycle R%d : %s\n', i, ME.message);
+        fprintf('    Erreur cycle R%d : %s\n', i, ME.message);
     end
 end
             
             btkCloseAcquisition(data);
-            fprintf('   ✅ Fichier traité avec succès\n\n');
+            fprintf('    Fichier traité avec succès\n\n');
             
         catch ME
-            fprintf('❌ Erreur fichier %s : %s\n\n', filename, ME.message);
+            fprintf(' Erreur fichier %s : %s\n\n', filename, ME.message);
         end
     end
 end
 
 % === SAUVEGARDE ===
 if height(results) > 0
-    fprintf('💾 Sauvegarde des résultats...\n');
+    fprintf(' Sauvegarde des résultats...\n');
     
     % Sauvegarde CSV
     writetable(results, output_file_csv);
-    fprintf('✅ CSV généré : %s\n', output_file_csv);
+    fprintf(' CSV généré : %s\n', output_file_csv);
     
     % Sauvegarde MAT
     MoS_data = struct();
@@ -241,19 +234,18 @@ if height(results) > 0
     MoS_data.freqVicon = freqVicon;       % Fréquence d'acquisition
     
     save(output_file_mat, 'MoS_data');
-    fprintf('✅ MAT généré : %s\n', output_file_mat);
+    fprintf(' MAT généré : %s\n', output_file_mat);
     
-    fprintf('📊 Total : %d cycles traités\n', height(results));
+    fprintf(' Total : %d cycles traités\n', height(results));
 else
-    fprintf('⚠️  Aucun résultat à sauvegarder\n');
+    fprintf('  Aucun résultat à sauvegarder\n');
 end
 
-fprintf('\n💡 PROCHAINE ÉTAPE : Lancer SPARC_LDLJ.m\n');
+fprintf('\n PROCHAINE ÉTAPE : Lancer SPARC_LDLJ.m\n');
 
 %% ========== FONCTIONS ==========
 
 function ho = estimate_heel_off_pair(hs, to, markers, side)
-% Heel-Off pour un couple (hs,to) donné – applique min 12 fr, 35–90% stance, lissage, seuil adaptatif.
 
 heel_marker = [side 'HEE'];
 
@@ -273,7 +265,7 @@ heel_z = fillmissing(heel_z, 'linear', 'EndValues', 'nearest');
 fs = 100;                                  % fréquence d’échantillonnage Vicon
 [bb, aa] = butter(2, 6/(fs/2), 'low');     % filtre passe-bas (ordre 2, fc=6 Hz)
 if numel(heel_z) > 6                       % sécurité si assez d’échantillons
-    heel_z = filtfilt(bb, aa, heel_z);     % filtrage zéro-phase : pas de décalage
+    heel_z = filtfilt(bb, aa, heel_z);     % filtrage zéro-phase
 end
 
 % --- Calcul de la vitesse verticale (mm/frame) ---

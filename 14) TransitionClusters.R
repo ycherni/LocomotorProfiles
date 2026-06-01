@@ -24,20 +24,20 @@ library(rcompanion)
 library(patchwork)
 library(ggpubr)
 
-setwd("C:/Users/silve/Desktop/DOCTORAT/UNIV MONTREAL/TRAVAUX-THESE/Surfaces_Irregulieres/Datas/Script/gaitAnalysisGUI/result/Fig/Clustering")
+setwd("XX") #Vers dossier avec données issues du clustering
 
 
 # ============================================================
 # 0. IMPORT DES DONNÉES
 # ============================================================
 
-df_clust <- read.csv("DATA_FOR_R_GLOBAL_20260123_1409.csv",
+df_clust <- read.csv("DATA_FOR_R_GLOBAL_XXX.csv", #Prendre celui utile à l'analyse
                      sep = ";", check.names = FALSE)
 
 df_meta  <- read.csv(file.choose(), sep = ";", check.names = FALSE)
 # → "participant.metadonnees"
 
-df_pa    <- read.csv(file.choose(), sep = ";", check.names = FALSE)
+df_pa    <- read.csv(file.choose(), sep = ";", check.names = FALSE) #Si besoin de mettre en lien de potentiel données d'AP
 # → "PhysicalActivity_Zscored.csv"
 
 
@@ -1093,7 +1093,7 @@ write.csv(
 
 # --- SAUVEGARDE ---
 ggsave(
-  "Panel_15Variables_Surface_Trajectory_MATLABstyle.png",
+  "Panel_15Variables_Surface_Trajectory.png",
   plot = p_panel_15,
   width = 20,
   height = 18,
@@ -1103,7 +1103,7 @@ ggsave(
 )
 
 ggsave(
-  "Panel_15Variables_Surface_Trajectory_MATLABstyle.tiff",
+  "Panel_15Variables_Surface_Trajectory.tiff",
   plot = p_panel_15,
   device = "tiff",
   width = 20,
