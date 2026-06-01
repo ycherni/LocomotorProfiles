@@ -8,10 +8,10 @@ clear; clc; close all;
 addpath(genpath('C:\Users\silve\OneDrive - Universite de Montreal\Silvere De Freitas - PhD - NeuroBiomech\Scripts\btk'));    
 addpath(genpath('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\functions'));
 
-sujet_id  = 'CTL_74';
+sujet_id  = 'CTL_80';
 surfaces  = {'Plat', 'Medium', 'High'};
-essais    = 1:10; 
-base_dir  = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\Data\enfants'; % Pensez à changer le répertoire d'âge ici!
+essais    = 1:5; 
+base_dir  = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\Data\jeunes_enfants'; % Pensez à changer le répertoire d'âge ici!
 
 freqVicon = 100;
 fc_filter = 6;

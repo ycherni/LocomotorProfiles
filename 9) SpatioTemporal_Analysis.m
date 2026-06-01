@@ -13,7 +13,7 @@ addpath(genpath('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Sur
 % Dossier où sont sauvegardés les résultats MoS et SPARC par participant
 mos_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\MoS';
 smooth_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\Smoothness';
-gvi_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\GVI\GVI_AllSurfaces_RefAdultsPlat';
+gvi_dir = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result\GVI\GVI_AllSurfaces_RefAdultsPlat'; % Attention à bien mettre cela à jour
 
 % Chemin de sauvegarde
 save_path = 'C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Surfaces_Irregulieres\Datas\Script\gaitAnalysisGUI\result';
@@ -555,7 +555,7 @@ for g = 1:length(groupList)
         fprintf('%s: %d participants\n', gName, participantCount);
     end
 end
-%%
+
 % Sauvegarder la structure finale
 save(fullfile(save_path, 'SpatioTemporalDATA.mat'), 'SpatioTemporalDATA');
 

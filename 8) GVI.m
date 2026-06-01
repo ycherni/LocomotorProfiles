@@ -30,7 +30,7 @@ if ~exist(outdir,'dir'); mkdir(outdir); end
 ts = char(datetime('now','Format','yyyyMMdd_HHmm'));
 
 %% === GROUPES (référence) ===
-ParticipantGroup; % doit créer Group.*
+ParticipantGroup; % doit créer Group.*, attention changer si MA base de données ou celle de MR
 assert(exist('Group','var')==1, 'ParticipantGroup.m doit créer une variable Group.');
 
 refAdults = string(Group.Adultes(:));  % IDs adultes de ton étude

@@ -423,18 +423,22 @@ make_pretty_label <- function(varname) {
   is_cv <- str_detect(v, "^CV_")
   is_si <- str_detect(v, "^SI_")
   
+  # Retirer "Norm_" pour CV et SI uniquement
+  if (is_cv || is_si) {
+    v <- str_replace(v, "Norm_", "")
+    v <- str_replace(v, "_ua$", "")
+  }
+  
   if (is_cv) {
-    # garder uniquement "CV_<nom_variable>" et jeter tout ce qui suit (unité, même si underscores)
     v <- str_replace(v, "^(CV_[^_]+_[^_]+).*$", "\\1")
     v <- str_replace(v, "^CV_", "")
-    v <- paste0("C.V ", v, " (%)")
+    v <- paste0("C.V. ", v, " (%)")
   }
   
   if (is_si) {
-    # garder uniquement "SI_<nom_variable>" (avec unité %)
     v <- str_replace(v, "^(SI_[^_]+_[^_]+).*$", "\\1")
     v <- str_replace(v, "^SI_", "")
-    v <- paste0("S.I ", v, " (%)")  # <-- MODIF (iii): ajout de (%)
+    v <- paste0("S.I. ", v, " (%)")
   }
   
   # 2) Unités (suffixes) -> format publication
@@ -476,6 +480,10 @@ make_pretty_label <- function(varname) {
   
   # 4) Rendre lisible : underscores -> espaces
   v <- str_replace_all(v, "_", " ")
+  v <- str_replace(v, "^StanceTime \\(s\\)$", "Stance Time (s)")
+  v <- str_replace(v, "^SwingTime \\(s\\)$",  "Swing Time (s)")
+  v <- str_replace(v, "^StepTime \\(s\\)$",   "Step Time (s)")
+  v <- str_replace(v, "^StepWidth \\(cm\\)$",   "Step Width (cm)")
   
   # 5) Petites mises en forme (optionnel mais utile pour article)
   v <- str_replace_all(v, "\\bAP\\b", "AP")
@@ -490,8 +498,8 @@ make_pretty_label <- function(varname) {
   v <- str_replace_all(v, "Double support", "Double support")
   
   # SI / CV : garder le préfixe explicite
-  v <- str_replace(v, "^SI ", "S.I. ")
-  v <- str_replace(v, "^CV ", "C.V. ")
+  # v <- str_replace(v, "^SI ", "S.I. ")
+  # v <- str_replace(v, "^C\\.V ", "C.V. ")
   
   # NCycles : rendre plus propre
   v <- str_replace(v, "^NCycles Left$", "N cycles Left")
@@ -829,7 +837,6 @@ make_median_connected_boxplot <- function(var_name, data) {
     theme_minimal(base_size = 25) +          # ← base montée à 25
     theme(
       plot.title         = element_text(face = "bold", hjust = 0.5, size = 25),
-      legend.position    = "none",
       panel.grid.minor   = element_blank(),
       panel.grid.major.x = element_blank(),
       axis.text.x        = element_text(size = 20, face = "bold"),
@@ -869,9 +876,9 @@ generate_domain_panel <- function(domain_name, var_list, data) {
   # Légende collective
   panel <- wrap_plots(plots_list, ncol = n_cols, guides = "collect") &
     theme(legend.position = "bottom",
-          legend.text      = element_text(size = 16),
-          legend.title     = element_text(size = 17, face = "bold"),
-          legend.key.size  = unit(1.4, "lines"))
+          legend.text      = element_text(size = 28),
+          legend.title     = element_text(size = 30, face = "bold"),
+          legend.key.size  = unit(2.5, "lines"))
   
   panel <- panel +
     plot_annotation(

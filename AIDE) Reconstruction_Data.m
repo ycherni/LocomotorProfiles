@@ -6,7 +6,7 @@ addpath(genpath('C:\Users\silve\Desktop\DOCTORAT\UNIV MONTREAL\TRAVAUX-THESE\Sur
 
 %% modif ou ajout de pistes cinématiques de marqueurs
 
-acq=btkReadAcquisition('CTL_67_Plat_10.c3d'); % ouverture du fichier C3D
+acq=btkReadAcquisition('CTL_81_High_04.c3d'); % ouverture du fichier C3D
 
 markers=btkGetMarkers(acq); % extraction de la cinematique des marqueurs
 
@@ -19,9 +19,9 @@ markers=btkGetMarkers(acq); % extraction de la cinematique des marqueurs
 
 % on change les valeurs de la cinematique des marqueurs pour fitter avec celle du marqueur disparu. le fait de modifier ces valeurs ne change rien à la cinematique de NOM_MARQUEUR, etc. car on n'enregistre pas par dessus les originales, on ne fait qu'utiliser leur cinématique.
 
-values=values+1; %rearrangement de la cinematique selon x pour fitter avec celle du marqueur disparu
-values2=values2+33.9;%rearrangement de la cinematique selon y pour fitter avec celle du marqueur disparu
-values3=values3-191.2;%rearrangement de la cinematique selon z pour fitter avec celle du marqueur disparu
+values=values+13.10; %rearrangement de la cinematique selon x pour fitter avec celle du marqueur disparu
+values2=values2-104.2;%rearrangement de la cinematique selon y pour fitter avec celle du marqueur disparu
+values3=values3-20.7;%rearrangement de la cinematique selon z pour fitter avec celle du marqueur disparu
 
 valeurs(:,1)=values(:,1); % on construit un nouveau vecteur 'valeurs' qui a pour première colonne le vecteur selon x de NOM_MARQUEUR, ...
 valeurs(:,2)=values2(:,2); % pour seconde colonne le vecteur selon y de NOM_MARQUEUR2
@@ -30,14 +30,14 @@ valeurs(:,3)=values3(:,3); % pour troisième colonne le vecteur selon z de NOM_M
 
 % [values4, residuals4]=btkGetPoint(acq,'RPSI'); % on extrait la cinématique du marqueur partiellement disparu que l'on sait bonne
 % valeurs(600:664,:)=values4(600:664,:); % on remplace les premieres frames de la cinématique (que l'on a créée à partir des 3 marqueurs) par celle du marqueur réel. Ici les 120 premières frames sont correctes pour le marqueur.
-[points, pointsInfo]=btkAppendPoint(acq, 'marker','T10', valeurs); % on crée le nouveau marqueur qui a donc les 120 premières frames à partir du réel puis une cinématique reconstruite.
+[points, pointsInfo]=btkAppendPoint(acq, 'marker','CLAV', valeurs); % on crée le nouveau marqueur qui a donc les 120 premières frames à partir du réel puis une cinématique reconstruite.
 
 
 %% ENREGISTREMENT DES DONNEES
 
-btkWriteAcquisition(acq,'CTL_67_Plat_10_NEW.c3d'); % création du nouveau fichier C3D. 
+btkWriteAcquisition(acq,'CTL_81_High_04_NEW.c3d'); % création du nouveau fichier C3D. 
 
 %% verfication 
-acq1=btkReadAcquisition('CTL_67_High_07_NEW.c3d'); % ouverture du fichier C3D
+acq1=btkReadAcquisition('CTL_80_Plat_04_NEW.c3d'); % ouverture du fichier C3D
 markers1=btkGetMarkers(acq1); % extraction de la cinematique des marqueurs
 

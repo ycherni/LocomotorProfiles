@@ -166,9 +166,118 @@ for (v in vars_marche) {
   ggsave(paste0("Boxplots_Individuels/Boxplot_", file_name, ".png"), 
          plot = p, width = 12, height = 10, units = "cm")
 }
-# Boxplots enregistrées dans "Clustering"
+
+# --- PANEL GLOBAL : 5 lignes x 3 colonnes ---
+library(patchwork)
+
+plots_list <- list()
+
+for (v in vars_marche) {
+  
+  clean_label <- v
+  clean_label <- gsub("^Mean_", "", clean_label)
+  
+  # Ordre important : cas spécifiques AVANT les règles génériques
+  if (grepl("Norm Gait Speed", clean_label, ignore.case = TRUE)) {
+    clean_label <- "Norm Gait Speed (au)"
+  } else if (grepl("MoS ML HS", clean_label, ignore.case = TRUE)) {
+    clean_label <- "MoS ML (%L0)"
+  } else if (grepl("MoS AP HS", clean_label, ignore.case = TRUE)) {
+    clean_label <- "MoS AP (%L0)"
+  } else if (grepl("COM SPARC Magnitude", clean_label, ignore.case = TRUE)) {
+    clean_label <- "SPARC (au)"
+  } else if (startsWith(v, "CV_")) {
+    clean_label <- gsub("^CV_", "C.V. ", clean_label)
+    clean_label <- paste0(gsub(" \\(.*\\)", "", clean_label), " (%)")
+  } else if (startsWith(v, "SI_")) {
+    clean_label <- gsub("^SI_", "S.I. ", clean_label)
+    clean_label <- gsub(" \\(.*\\)", "", clean_label)
+    clean_label <- paste0(clean_label, " (%)")           
+  }
+  
+  # Remplacement global de "ua" par "au" pour les cas restants
+  clean_label <- gsub("\\(ua\\)", "(au)", clean_label)
+  
+  p <- ggplot(df, aes(x = factor(ClusterID), y = .data[[v]], fill = factor(ClusterID))) +
+    geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+    geom_jitter(width = 0.1, alpha = 0.4, size = 0.8) +
+    scale_fill_manual(values = mes_couleurs) +
+    labs(title = clean_label, x = NULL, y = NULL, fill = "Cluster") +
+    theme_classic(base_size = 8) +
+    theme(
+      plot.title      = element_text(hjust = 0.5, face = "bold", size = 15),
+      axis.text.x     = element_text(size = 15),
+      axis.text.y     = element_text(size = 13),
+      legend.position = "none"
+    )
+  
+  plots_list[[v]] <- p
+}
+
+# --- AJOUT DES DOMAINES À GAUCHE DU PANEL ---
+
+domain_labels <- c(
+  "Pace",
+  "Rhythm",
+  "Dynamic\nstability",
+  "Asymmetry",
+  "Variability"
+)
+
+# Créer les panneaux de domaine
+domain_plots <- lapply(domain_labels, function(lab) {
+  ggplot() +
+    annotate(
+      "text",
+      x = 0.5, y = 0.5,
+      label = lab,
+      angle = 90,
+      fontface = "bold",
+      size = 6,
+      hjust = 0.5,
+      vjust = 0.5
+    ) +
+    xlim(0, 1) +
+    ylim(0, 1) +
+    theme_void() +
+    theme(
+      plot.margin = margin(2, 2, 2, 2)
+    )
+})
+
+# S'assurer que les figures sont dans le bon ordre
+plots_ordered <- plots_list[vars_marche]
+
+# Construire une liste complète : 1 colonne domaine + 3 variables par ligne
+panel_list <- list(
+  domain_plots[[1]], plots_ordered[[1]],  plots_ordered[[2]],  plots_ordered[[3]],
+  domain_plots[[2]], plots_ordered[[4]],  plots_ordered[[5]],  plots_ordered[[6]],
+  domain_plots[[3]], plots_ordered[[7]],  plots_ordered[[8]],  plots_ordered[[9]],
+  domain_plots[[4]], plots_ordered[[10]], plots_ordered[[11]], plots_ordered[[12]],
+  domain_plots[[5]], plots_ordered[[13]], plots_ordered[[14]], plots_ordered[[15]]
+)
+
+# Assemblage final : 4 colonnes, dont la première très étroite
+panel_all <- wrap_plots(panel_list, ncol = 4, byrow = TRUE) +
+  plot_layout(
+    widths = c(0.35, 1, 1, 1),
+    heights = rep(1, 5)
+  ) &
+  theme(legend.position = "none")
 
 
+ggsave("Panel_All_Variables_Clusters.png",
+       plot   = panel_all,
+       width  = 27, height = 30, units = "cm",
+       dpi    = 300, bg = "white")
+
+ggsave("Panel_All_Variables_Clusters.tif",
+       plot   = panel_all,
+       width  = 27, height = 30, units = "cm",
+       dpi    = 600,
+       compression = "lzw")
+
+print("Panel global exporté.")
 
 
 # 4 - TABLEAU RÉCAPITULATIF (Médiane [IQR]) & TESTS STATISTIQUES
@@ -479,20 +588,35 @@ ggplot(df, aes(x = as.factor(ClusterID), y = AgeMonths.y, fill = as.factor(Clust
   scale_fill_manual(values = c("#3498db", "#e74c3c")) +
   labs(title = "Age distribution by cluster",
        x = "Cluster ID", y = "Age (months)", fill = "Cluster") +
-  theme_classic() +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  theme_classic(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
+    axis.title = element_text(size = 16),
+    axis.text  = element_text(size = 14),
+    legend.title = element_text(size = 14),
+    legend.text  = element_text(size = 13)
+  )
 
 
 # --- 3. RÉPARTITIONS (PROPORTIONS) ---
+
+my_theme <- theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
+    axis.title = element_text(size = 16),
+    axis.text  = element_text(size = 14),
+    legend.title = element_text(size = 14),
+    legend.text  = element_text(size = 13)
+  )
+
 # A. Age group
 p1 <- ggplot(df, aes(x = AgeGroup_EN, fill = as.factor(ClusterID))) +
   geom_bar(position = "fill") +
   scale_y_continuous(labels = scales::percent) +
   scale_fill_manual(values = c("#3498db", "#e74c3c")) +
   labs(title = "Age group", x = "", y = "% of sample", fill = "Cluster") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 45, hjust = 1))
+  my_theme +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 14))
 
 # B. Sex
 p2 <- ggplot(df, aes(x = Sex_EN, fill = as.factor(ClusterID))) +
@@ -500,8 +624,7 @@ p2 <- ggplot(df, aes(x = Sex_EN, fill = as.factor(ClusterID))) +
   scale_y_continuous(labels = scales::percent) +
   scale_fill_manual(values = c("#3498db", "#e74c3c")) +
   labs(title = "Sex", x = "", y = "", fill = "Cluster") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  my_theme
 
 # C. Surface (Condition)
 p3 <- ggplot(df, aes(x = Condition_EN, fill = as.factor(ClusterID))) +
@@ -509,8 +632,7 @@ p3 <- ggplot(df, aes(x = Condition_EN, fill = as.factor(ClusterID))) +
   scale_y_continuous(labels = scales::percent) +
   scale_fill_manual(values = c("#3498db", "#e74c3c")) +
   labs(title = "Surface", x = "", y = "", fill = "Cluster") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  my_theme
 
 
 # --- 4. AFFICHAGE COMBINÉ ---
@@ -522,6 +644,46 @@ library(patchwork)
     theme = theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16))
   )
 
+# ============================================================
+# VALEURS NUMÉRIQUES DES GRAPHIQUES DE PROPORTIONS
+# même logique que geom_bar(position = "fill")
+# ============================================================
+
+# 1. Proportion de clusters dans chaque groupe d'âge
+prop_agegroup_cluster <- df %>%
+  count(AgeGroup_EN, ClusterID) %>%
+  group_by(AgeGroup_EN) %>%
+  mutate(
+    total = sum(n),
+    percent = round(100 * n / total, 1)
+  ) %>%
+  ungroup()
+
+print(prop_agegroup_cluster)
+
+# 2. Proportion de clusters dans chaque sexe
+prop_sex_cluster <- df %>%
+  count(Sex_EN, ClusterID) %>%
+  group_by(Sex_EN) %>%
+  mutate(
+    total = sum(n),
+    percent = round(100 * n / total, 1)
+  ) %>%
+  ungroup()
+
+print(prop_sex_cluster)
+
+# 3. Proportion de clusters dans chaque surface
+prop_surface_cluster <- df %>%
+  count(Condition_EN, ClusterID) %>%
+  group_by(Condition_EN) %>%
+  mutate(
+    total = sum(n),
+    percent = round(100 * n / total, 1)
+  ) %>%
+  ungroup()
+
+print(prop_surface_cluster)
 
 # --- 5. MIGRATIONS DE PARTICIPANTS ENTRE CLUSTERS ---
 # 1. Préparation des labels de légende avec les % calculés en Section II

@@ -196,23 +196,79 @@ if isempty(nPC_final), nPC_final = min(3, size(score,2)); end
 nPC_final = max(2, nPC_final); % minimum 2 pour garder une structure
 fprintf('nPC_final choisi: %d PCs (variance cumulée = %.1f%%)\n', nPC_final, cumVar(nPC_final));
 
-% === HEATMAP DES LOADINGS ===
-% Matrice des loadings (corrélations entre variables et PCs sélectionnées)
+% === HEATMAP DES LOADINGS (avec gras si |loading| >= 0.50) ===
+fig_heatmap_loadings = figure('Color','w', 'Position', [100 100 600 520]);
 loadings = corr(dataNorm, score(:, 1:nPC_final));
+ax_load = axes('Parent', fig_heatmap_loadings);
 
-fig_heatmap_loadings = figure('Color','w', 'Position', [100 100 850 520]); % avant c'était : 1200 800 (pour les deux derniers)
-h_load = heatmap(arrayfun(@(i) sprintf('PC%d (%.1f%%)', i, explained(i)), 1:nPC_final, 'UniformOutput', false), ...
-                 allVars_disp, loadings, ...
-                 'Title', sprintf('Variable Loadings on the selected %d principal components', nPC_final), ...
-                 'XLabel', 'Principal components', ...
-                 'YLabel', 'Gait variables', ...
-                 'Colormap', redblue(256), ...
-                 'ColorLimits', [-1, 1]);
-h_load.FontSize = 12;
-h_load.CellLabelFormat = '%.2f';
-h_load.GridVisible = 'on';
+nVars = numel(allVars_disp);
 
-exportgraphics(fig_heatmap_loadings, fullfile(outdir, "01b_Heatmap_Loadings_SelectedPCs_"+ts+".png"), 'Resolution',300);
+imagesc(ax_load, loadings);
+colormap(ax_load, redblue(256));
+clim(ax_load, [-1, 1]);
+cb = colorbar(ax_load);
+cb.Label.String = 'Correlation';
+
+% Axes : étiquettes
+set(ax_load, ...
+    'XTick', 1:nPC_final, 'XTickLabel', {}, ...
+    'YTick', 1:nVars,     'YTickLabel', allVars_disp, ...
+    'FontSize', 10, 'TickLabelInterpreter', 'none');
+
+ax_load.DataAspectRatio = [1 nVars/nPC_final 1];
+
+for iCol = 1:nPC_final
+    text(ax_load, iCol, nVars + 0.75, ...
+        sprintf('PC%d', iCol), ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', ...
+        'FontSize', 10, 'FontWeight', 'bold', 'Interpreter', 'none');
+    text(ax_load, iCol, nVars + 1.30, ...
+        sprintf('(%.1f%%)', explained(iCol)), ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', ...
+        'FontSize', 9, 'Interpreter', 'none');
+end
+xlabel(ax_load, ''); 
+ylabel(ax_load, 'Gait variables');
+
+% Annotations textuelles avec gras conditionnel
+for iRow = 1:nVars
+    for iCol = 1:nPC_final
+        val = loadings(iRow, iCol);
+        txt = sprintf('%.2f', val);
+        if abs(val) >= 0.50
+            fw = 'bold';
+        else
+            fw = 'normal';
+        end
+        % Couleur du texte selon luminosité de fond
+        if abs(val) > 0.65
+            fc = 'w';   % fond saturé → texte blanc
+        else
+            fc = 'k';   % fond pâle → texte noir
+        end
+        text(ax_load, iCol, iRow, txt, ...
+            'HorizontalAlignment', 'center', ...
+            'VerticalAlignment',   'middle', ...
+            'FontSize', 9, ...
+            'FontWeight', fw, ...
+            'Color', fc, ...
+            'Interpreter', 'none');
+    end
+end
+
+% Quadrillage des cellules
+for iRow = 0:nVars
+    yline(ax_load, iRow + 0.5, 'Color', [0.5 0.5 0.5], 'LineWidth', 0.4);
+end
+for iCol = 0:nPC_final
+    xline(ax_load, iCol + 0.5, 'Color', [0.5 0.5 0.5], 'LineWidth', 0.4);
+end
+box(ax_load, 'on');
+ax_load.LineWidth = 0.8;
+
+exportgraphics(fig_heatmap_loadings, ...
+    fullfile(outdir, "01b_Heatmap_Loadings_SelectedPCs_"+ts+".png"), 'Resolution', 300);
+
 
 % === PAIR PLOTS DES PCs SELECTIONNEES ===
 nPC_pairplot = min(5, nPC_final);
@@ -285,6 +341,37 @@ for kk = 1:numel(kRange)
     d2 = sum((Xpcs_all - Ctmp(idx_tmp, :)).^2, 2);  % n×1
     WCSS_vals(kk) = sum(d2);
 end
+
+% === EXPORT DES VALEURS WCSS, SILHOUETTE ET ARI EN FONCTION DE k ===
+
+Kselection_table = table();
+Kselection_table.k = kRange(:);
+Kselection_table.WCSS = WCSS_vals(:);
+Kselection_table.Mean_Silhouette = sil_vals(:);
+Kselection_table.ARI_bootstrap_mean = ari_mean(:);
+
+% Réduction absolue du WCSS entre k-1 et k
+Kselection_table.Delta_WCSS = [NaN; ...
+    Kselection_table.WCSS(1:end-1) - Kselection_table.WCSS(2:end)];
+
+% Réduction relative du WCSS en %
+Kselection_table.Percent_WCSS_Reduction = [NaN; ...
+    ((Kselection_table.WCSS(1:end-1) - Kselection_table.WCSS(2:end)) ./ ...
+    Kselection_table.WCSS(1:end-1)) * 100];
+
+% Ratio du gain par rapport au gain obtenu entre k = 1 et k = 2
+gain_k2 = Kselection_table.Delta_WCSS(Kselection_table.k == 2);
+Kselection_table.Gain_Ratio_vs_k2 = Kselection_table.Delta_WCSS ./ gain_k2;
+
+disp('=== K-selection summary: WCSS, silhouette and ARI ===');
+disp(Kselection_table);
+
+% Export CSV
+out_kselection = fullfile(outdir, "K_SELECTION_WCSS_SILHOUETTE_ARI_GLOBAL_" + ts + ".csv");
+writetable(Kselection_table, out_kselection);
+
+fprintf('✅ Export k-selection summary : %s\n', out_kselection);
+
 fig_elbow = figure('Color','w');
 plot(kRange, WCSS_vals, '-o', 'LineWidth',1.5);
 xlabel('Number of clusters (k)');
