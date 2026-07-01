@@ -1,7 +1,6 @@
 # LocomotorProfiles — Analyses données STP du projet SurfaceIRR
 
-> **Projet MSc. Silvère De Freitas** — Analyse de la marche sur surfaces irrégulières chez différents groupes d'âge (Jeunes Enfants, Enfants, Adolescents, Adultes). 2025-2026
----
+> **Projet MSc. Silvère De Freitas** — Analyse de la marche sur surfaces irrégulières chez différents groupes d'âge (Jeunes Enfants, Enfants, Adolescents, Adultes). [2025-2026] https://www.biorxiv.org/content/10.64898/2026.06.02.729581v1.abstract ---
 
 ## 📋 Table des matières
 
